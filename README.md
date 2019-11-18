@@ -5,7 +5,7 @@
 >
 > 本项目将保持一定程度的维护，留作参考之用。
 >
-> 其它语言的开发者请浏览：[酷Q 应用开发 V9 SDK](https://cqp.cc/t/15124)
+> 其它语言的 SDK 请参考：[酷Q 应用开发 V9 SDK](https://cqp.cc/t/15124)
 
 # cqsdk-vc [![Build status](https://ci.appveyor.com/api/projects/status/b45ik9dass1rnrnj?svg=true)](https://ci.appveyor.com/project/Coxxs/cqsdk-vc)
 
@@ -24,6 +24,19 @@
 `CQPdemo/cqp.h` - 酷Q SDK 头文件，通常无需修改
 
 `CQPdemo/CQP.lib` - CQP.dll 的动态连接 .lib 文件，便于 C、C++ 等调用 酷Q 的方法。
+
+关于内存释放
+----------
+酷Q V9 应用机制中包含了一部分涉及字符串 `const char*` 的参数及返回值。酷Q V9 中均要求调用者负责释放字符串对应的内存。
+
+具体规则如下：
+
+* 对于 Event 的字符串参数，酷Q 将在事件函数返回后立即释放其内存。
+* 对于 Api 的字符串**参数**，应用负责在调用完后进行释放。
+* 对于 Api 的字符串**返回值**，酷Q 负责在合适的时机进行释放。
+  * 应用不应对字符串**返回值**进行释放，否则一段时间后，酷Q 尝试释放该内存时将发生致命错误。
+  * 应用应在调用 Api 后之后立即使用返回的指针，避免 酷Q 释放内存后，应用使用该指针时发生致命错误。
+  * 如果 Api 调用失败，将返回空指针 `NULL`，应用应判断该情况，避免读取空指针发生致命错误。
 
 官方网站
 --------
