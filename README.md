@@ -1,4 +1,14 @@
+> 推荐 C++ 开发者选用以下 SDK，事件及 Api 的实现较本项目更为完善，更新更为及时：
+>
+> * [richardchien/coolq-cpp-sdk](https://github.com/richardchien/coolq-cpp-sdk)
+> * [MikuPy2001/CQSDK](https://github.com/MikuPy2001/CQSDK)
+>
+> 本项目将保持一定程度的维护，留作参考之用。
+>
+> 其它语言的开发者请浏览：[酷Q 应用开发 V9 SDK](https://cqp.cc/t/15124)
+
 # cqsdk-vc [![Build status](https://ci.appveyor.com/api/projects/status/b45ik9dass1rnrnj?svg=true)](https://ci.appveyor.com/project/Coxxs/cqsdk-vc)
+
 使用 Visual C++ 编写 酷Q V9 应用。
 
 [下载](https://github.com/CoolQ/cqsdk-vc/archive/master.zip)
