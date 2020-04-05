@@ -4,6 +4,7 @@
 * Written by Coxxs & Thanks for the help of orzFly
 */
 
+#include "myCPK.h"
 #include "stdafx.h"
 #include "string"
 #include "cqp.h"
@@ -87,6 +88,7 @@ CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t msgId, int64_t 
 	//如果要回复消息，请调用酷Q方法发送，并且这里 return EVENT_BLOCK - 截断本条消息，不再继续处理  注意：应用优先级设置为"最高"(10000)时，不得使用本返回值
 	//如果不回复消息，交由之后的应用/过滤器处理，这里 return EVENT_IGNORE - 忽略本条消息
 	return EVENT_IGNORE;
+
 }
 
 
@@ -95,7 +97,45 @@ CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t msgId, int64_t 
 */
 CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fromGroup, int64_t fromQQ, const char *fromAnonymous, const char *msg, int32_t font) {
 
-	return EVENT_IGNORE; //关于返回值说明, 见“_eventPrivateMsg”函数
+	if (fromGroup != 656724943)
+	{
+		return EVENT_IGNORE;
+	}
+
+	enum class status
+	{
+		normal = 1,
+		chess = 2
+	};
+
+	static status statu = status::normal;
+	static chess game;
+
+	int size = 0;
+
+	game.control(msg, fromQQ);
+	
+	while(game.msg_size())
+	{
+		string mid = game.pop_msg();
+		if (mid.size())
+		{
+			char* rstr = (char*)malloc(sizeof(char) * (mid.size() + 1));
+			strcpy_s(rstr, mid.size() + 1, mid.c_str());
+			CQ_sendGroupMsg(ac, 656724943, rstr);
+			Sleep(200);
+		}
+		else
+		{
+			return EVENT_BLOCK;
+		}
+	}
+
+	return EVENT_IGNORE;
+	//如果要回复消息，请调用酷Q方法发送，并且这里 return EVENT_BLOCK - 截断本条消息，不再继续处理  注意：应用优先级设置为"最高"(10000)时，不得使用本返回值
+	//如果不回复消息，交由之后的应用/过滤器处理，这里 return EVENT_IGNORE - 忽略本条消息
+
+	 //关于返回值说明, 见“_eventPrivateMsg”函数
 }
 
 

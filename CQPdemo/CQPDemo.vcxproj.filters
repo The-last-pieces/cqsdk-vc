@@ -27,6 +27,9 @@
     <ClInclude Include="appmain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="myCPK.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="appmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="myCPK.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
