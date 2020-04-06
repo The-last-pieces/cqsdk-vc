@@ -97,27 +97,15 @@ CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t msgId, int64_t 
 */
 CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fromGroup, int64_t fromQQ, const char *fromAnonymous, const char *msg, int32_t font) {
 
-	if (fromGroup != 656724943)
-	{
-		return EVENT_IGNORE;
-	}
-
-	enum class status
-	{
-		normal = 1,
-		chess = 2
-	};
-
-	static status statu = status::normal;
-	static chess game;
+	chess* game = chess::getinstance();
 
 	int size = 0;
 
-	game.control(msg, fromQQ);
+	game->control(msg, fromQQ);
 	
-	while(game.msg_size())
+	while(game->msg_size())
 	{
-		string mid = game.pop_msg();
+		string mid = game->pop_msg();
 		if (mid.size())
 		{
 			char* rstr = (char*)malloc(sizeof(char) * (mid.size() + 1));

@@ -24,25 +24,35 @@ class chess
 	deque<string> msgque;//消息队列
 	deque<vector<vector<short>>> history;//记录
 	vector<vector<short>> table;//棋盘
-	int size;
+	const int size;
 	bool isend = false;
 	int role = 0;//轮次
 	string errlog;
 	long long playerid[2] = { 0 };//玩家id
 
 	static chess* running;
+	chess(size_t _size = 9);
 public:
+
+	static chess* getinstance()
+	{
+		if (running)
+		{
+			return running;
+		}
+		return new chess;
+	}
+
 	size_t msg_size();
 
 	string pop_msg();
 	void control(string msg, long long userid);
 
-	chess(size_t _size = 10);
-	~chess() {}
+	~chess();
 
 private:
 	void init_table();
 	bool action(int x, int y);
-	string map_to_str();
+	void map_to_str();
 	bool game_over();
 };

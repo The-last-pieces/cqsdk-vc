@@ -1,8 +1,24 @@
 ﻿#include "myCPK.h"
 
+chess* chess::running = nullptr;
 chess::chess(size_t _size) :size(RANGE_IN(7, 20, _size))
 {
+	if (running)
+	{
+		delete running;
+		running = nullptr;
+	}
+
+	running = this;
 	init_table();
+}
+chess::~chess()
+{
+	if (running)
+	{
+		delete running;
+		running = nullptr;
+	}
 }
 
 void chess::init_table()
@@ -50,7 +66,7 @@ void chess::control(string msg, long long userid)
 	switch (now)
 	{
 	case Mode::sleep:
-		if (msg == "chess")
+		if (msg == "chess")// && userid == 2776835685)
 		{
 			now = Mode::waiting;
 			playerid[0] = userid;
@@ -72,7 +88,7 @@ void chess::control(string msg, long long userid)
 				stringstream ss;
 				ss << userid << "接受游戏";
 				msgque.push_back(ss.str());
-				msgque.push_back(map_to_str());
+				map_to_str();
 			}
 		}
 		break;
@@ -86,7 +102,7 @@ void chess::control(string msg, long long userid)
 					history.pop_back();
 					history.pop_back();
 					table = history.back();
-					msgque.push_back(map_to_str());
+					map_to_str();
 				}
 				else
 				{
@@ -109,7 +125,7 @@ void chess::control(string msg, long long userid)
 			if (action(x, y))
 			{
 				role = !role;
-				msgque.push_back(map_to_str());
+				map_to_str();
 
 				history.push_back(table);
 				if (history.size() > 6)
@@ -127,7 +143,8 @@ bool chess::action(int x, int y)
 {
 	if (x <= 0 || x > size || y <= 0 || y > size)
 	{
-		msgque.push_back("坐标错误");
+		return false;
+		//msgque.push_back("坐标错误");
 	}
 	else
 	{
@@ -143,27 +160,21 @@ bool chess::action(int x, int y)
 	}
 	return false;
 }
-string chess::map_to_str()
+void chess::map_to_str()
 {
 	stringstream rstr;
 
 	if (!game_over())
 	{
-		rstr << "轮到" << playerid[role] << endl;
+		rstr << "轮到 [CQ:at,qq=" << playerid[role] << "]" << "落子" << endl << "x\\y 1 2  3  4 5  6  7 8  9\n";
 	}
-	rstr << setw(3) << "x\\y";
+	string allstr[] = { " O"," X"," Y" };
 	for (int i = 1; i <= size; ++i)
 	{
-		rstr << setw(3) << i;
-	}
-	rstr << endl;
-	string allstr[] = { " ※"," O"," √" };
-	for (int i = 1; i <= size; ++i)
-	{
-		rstr << setw(3) << i;
+		rstr << ' ' << i << ' ';
 		for (int j = 1; j <= size; ++j)
 		{
-			rstr << setw(3) << allstr[table[i][j]];
+			rstr << allstr[table[i][j]];
 		}
 		rstr << endl;
 	}
@@ -173,7 +184,7 @@ string chess::map_to_str()
 		rstr << " 玩家胜利\n";
 	}
 
-	return rstr.str();
+	msgque.push_back(rstr.str());
 }
 bool chess::game_over()
 {
