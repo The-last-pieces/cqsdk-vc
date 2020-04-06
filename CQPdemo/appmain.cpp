@@ -9,6 +9,7 @@
 #include "string"
 #include "cqp.h"
 #include "appmain.h" //应用AppID等信息，请正确填写，否则酷Q可能无法加载
+#include "Qtool.h"
 
 using namespace std;
 
@@ -99,9 +100,13 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fr
 
 	chess* game = chess::getinstance();
 
-	int size = 0;
+	string mid = get_call(fromGroup, fromQQ);
+	char* usercall = (char*)malloc(sizeof(char) * (mid.size() + 1));
+	strcpy_s(usercall, mid.size() + 1, mid.c_str());
 
-	game->control(msg, fromQQ);
+	CQ_addLog(ac, CQLOG_DEBUG, "txt", usercall);
+
+	game->control(msg, { fromQQ,usercall }, fromGroup);
 	
 	while(game->msg_size())
 	{
@@ -110,8 +115,8 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fr
 		{
 			char* rstr = (char*)malloc(sizeof(char) * (mid.size() + 1));
 			strcpy_s(rstr, mid.size() + 1, mid.c_str());
-			CQ_sendGroupMsg(ac, 656724943, rstr);
-			Sleep(200);
+			CQ_sendGroupMsg(ac, game->groupid, rstr);
+			Sleep(20);
 		}
 		else
 		{

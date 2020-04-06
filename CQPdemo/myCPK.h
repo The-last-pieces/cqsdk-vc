@@ -25,13 +25,16 @@ class chess
 	deque<vector<vector<short>>> history;//记录
 	vector<vector<short>> table;//棋盘
 	const int size;
-	bool isend = false;
 	int role = 0;//轮次
-	string errlog;
 	long long playerid[2] = { 0 };//玩家id
 
 	static chess* running;
 	chess(size_t _size = 9);
+
+public:
+
+	long long groupid = 0;//所在群
+
 public:
 
 	static chess* getinstance()
@@ -46,7 +49,7 @@ public:
 	size_t msg_size();
 
 	string pop_msg();
-	void control(string msg, long long userid);
+	void control(string msg, pair<long long, string> user, long long groupid);
 
 	~chess();
 

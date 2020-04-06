@@ -61,39 +61,45 @@ string chess::pop_msg()
 	}
 }
 
-void chess::control(string msg, long long userid)
+void chess::control(string msg, pair<long long,string> user,long long group)
 {
+	if (groupid && groupid != group)
+	{
+		return;
+	}
+
 	switch (now)
 	{
 	case Mode::sleep:
-		if (msg == "chess")// && userid == 2776835685)
+		if (msg == "chess" && user.first == 2776835685)
 		{
 			now = Mode::waiting;
-			playerid[0] = userid;
+			playerid[0] = user.first;
+			groupid = group;
 
 			stringstream ss;
-			ss << userid << "发起游戏";
+			ss << user.second << "发起游戏";
 			init_table();
 			msgque.push_back(ss.str());
 		}
 		break;
 	case Mode::waiting:
-		if (playerid[0] != userid)
+		if (playerid[0] != user.first)
 		{
 			if (msg == "chess")
 			{
 				now = Mode::start;
-				playerid[1] = userid;
+				playerid[1] = user.first;
 
 				stringstream ss;
-				ss << userid << "接受游戏";
+				ss << user.second << "接受游戏";
 				msgque.push_back(ss.str());
 				map_to_str();
 			}
 		}
 		break;
 	case Mode::start:
-		if (playerid[role] == userid)
+		if (playerid[role] == user.first)
 		{
 			if (msg == "back")
 			{
@@ -115,6 +121,7 @@ void chess::control(string msg, long long userid)
 				now = Mode::sleep;
 				this->history.clear();
 				playerid[0] = playerid[1] = 0;
+				groupid = 0;
 				msgque.push_back("游戏中止");
 				break;
 			}
@@ -144,7 +151,6 @@ bool chess::action(int x, int y)
 	if (x <= 0 || x > size || y <= 0 || y > size)
 	{
 		return false;
-		//msgque.push_back("坐标错误");
 	}
 	else
 	{
@@ -166,8 +172,9 @@ void chess::map_to_str()
 
 	if (!game_over())
 	{
-		rstr << "轮到 [CQ:at,qq=" << playerid[role] << "]" << "落子" << endl << "x\\y 1 2  3  4 5  6  7 8  9\n";
+		rstr << "轮到 [CQ:at,qq=" << playerid[role] << "]" << "落子" << endl;
 	}
+	rstr<< "x\\y 1 2  3  4 5  6  7 8  9\n";;
 	string allstr[] = { " O"," X"," Y" };
 	for (int i = 1; i <= size; ++i)
 	{
@@ -178,13 +185,15 @@ void chess::map_to_str()
 		}
 		rstr << endl;
 	}
-	if (game_over())
-	{
-		rstr << playerid[!role];
-		rstr << " 玩家胜利\n";
-	}
 
 	msgque.push_back(rstr.str());
+	if (game_over())
+	{
+		stringstream ss;
+		ss << "[CQ:at, qq = " << playerid[role] << "]";
+		ss << " 玩家胜利\n";
+		msgque.push_back(ss.str());
+	}
 }
 bool chess::game_over()
 {
