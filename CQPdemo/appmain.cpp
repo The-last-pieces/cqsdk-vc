@@ -104,8 +104,6 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fr
 	char* usercall = (char*)malloc(sizeof(char) * (mid.size() + 1));
 	strcpy_s(usercall, mid.size() + 1, mid.c_str());
 
-	CQ_addLog(ac, CQLOG_DEBUG, "txt", usercall);
-
 	game->control(msg, { fromQQ,usercall }, fromGroup);
 	
 	while(game->msg_size())

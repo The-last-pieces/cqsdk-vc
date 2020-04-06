@@ -54,8 +54,9 @@ public:
 	~chess();
 
 private:
+	void clear_table();
 	void init_table();
 	bool action(int x, int y);
-	void map_to_str();
+	string map_to_str();
 	bool game_over();
 };

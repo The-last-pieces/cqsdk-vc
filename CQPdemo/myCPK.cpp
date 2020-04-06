@@ -57,11 +57,15 @@ string chess::pop_msg()
 	}
 	else
 	{
+		if (now == Mode::sleep)
+		{
+			groupid = 0;
+		}
 		return "";
 	}
 }
 
-void chess::control(string msg, pair<long long,string> user,long long group)
+void chess::control(string msg, pair<long long, string> user, long long group)
 {
 	if (groupid && groupid != group)
 	{
@@ -71,7 +75,7 @@ void chess::control(string msg, pair<long long,string> user,long long group)
 	switch (now)
 	{
 	case Mode::sleep:
-		if (msg == "chess" && user.first == 2776835685)
+		if (msg == "chess")
 		{
 			now = Mode::waiting;
 			playerid[0] = user.first;
@@ -86,15 +90,28 @@ void chess::control(string msg, pair<long long,string> user,long long group)
 	case Mode::waiting:
 		if (playerid[0] != user.first)
 		{
-			if (msg == "chess")
+			if (msg == "join")
 			{
 				now = Mode::start;
 				playerid[1] = user.first;
 
 				stringstream ss;
-				ss << user.second << "接受游戏";
+				ss << user.second << "加入了游戏";
 				msgque.push_back(ss.str());
-				map_to_str();
+
+				ss.str("");
+				ss << "游戏开始\n先手为:[CQ:at,qq=" << playerid[role] << "]\n" << map_to_str();
+				msgque.push_back(ss.str());
+			}
+		}
+		else
+		{
+			if (msg == "cancle")
+			{
+				stringstream ss;
+				ss << user.second << "取消了游戏";
+				msgque.push_back(ss.str());
+				clear_table();
 			}
 		}
 		break;
@@ -108,7 +125,7 @@ void chess::control(string msg, pair<long long,string> user,long long group)
 					history.pop_back();
 					history.pop_back();
 					table = history.back();
-					map_to_str();
+					msgque.push_back(map_to_str());
 				}
 				else
 				{
@@ -118,11 +135,11 @@ void chess::control(string msg, pair<long long,string> user,long long group)
 			}
 			if (msg == "end")
 			{
-				now = Mode::sleep;
-				this->history.clear();
-				playerid[0] = playerid[1] = 0;
-				groupid = 0;
-				msgque.push_back("游戏中止");
+				clear_table();
+				stringstream ss;
+				ss << user.second;
+				ss << "投降认输";
+				msgque.push_back(ss.str());
 				break;
 			}
 
@@ -131,8 +148,25 @@ void chess::control(string msg, pair<long long,string> user,long long group)
 			ss >> x >> y;
 			if (action(x, y))
 			{
-				role = !role;
-				map_to_str();
+				if (game_over())
+				{
+					stringstream ss;
+					ss << map_to_str();
+					ss << "\n[CQ:at,qq=" << playerid[role] << "]";
+					ss << " 玩家胜利\n";
+					msgque.push_back(ss.str());
+					clear_table();
+					break;
+				}
+				else
+				{
+					stringstream ss;
+					role = !role;
+					ss << "轮到 [CQ:at,qq=" << playerid[role] << "]" << "落子" << endl;
+					ss << map_to_str();
+
+					msgque.push_back(ss.str());
+				}
 
 				history.push_back(table);
 				if (history.size() > 6)
@@ -145,6 +179,12 @@ void chess::control(string msg, pair<long long,string> user,long long group)
 	default:
 		break;
 	}
+}
+void chess::clear_table()
+{
+	now = Mode::sleep;
+	history.clear();
+	playerid[0] = playerid[1] = 0;
 }
 bool chess::action(int x, int y)
 {
@@ -166,15 +206,10 @@ bool chess::action(int x, int y)
 	}
 	return false;
 }
-void chess::map_to_str()
+string chess::map_to_str()
 {
 	stringstream rstr;
-
-	if (!game_over())
-	{
-		rstr << "轮到 [CQ:at,qq=" << playerid[role] << "]" << "落子" << endl;
-	}
-	rstr<< "x\\y 1 2  3  4 5  6  7 8  9\n";;
+	rstr << "x\\y 1 2  3  4 5  6  7 8  9\n";
 	string allstr[] = { " O"," X"," Y" };
 	for (int i = 1; i <= size; ++i)
 	{
@@ -185,19 +220,13 @@ void chess::map_to_str()
 		}
 		rstr << endl;
 	}
+	rstr << "x\\y 1 2  3  4 5  6  7 8  9";
 
-	msgque.push_back(rstr.str());
-	if (game_over())
-	{
-		stringstream ss;
-		ss << "[CQ:at, qq = " << playerid[role] << "]";
-		ss << " 玩家胜利\n";
-		msgque.push_back(ss.str());
-	}
+	return rstr.str();
 }
 bool chess::game_over()
 {
-	const int check = !role + 1;
+	const int check = role + 1;
 
 	for (int i = 1; i <= size; ++i)
 	{
